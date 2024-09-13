@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class LaunchcrewAppApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(LaunchcrewAppApplication.class, args);
-	}
-
+  public static void main(String[] args) {
+    SpringApplication.run(LaunchcrewAppApplication.class, args);
+  }
 }
