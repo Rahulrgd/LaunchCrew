@@ -1,13 +1,12 @@
 package com.launchcrew.launchcrew_app.Config;
 
-
 import java.util.Arrays;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
@@ -19,22 +18,18 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.launchcrew.launchcrew_app.JwtAuthentication.JwtAuthenticationFilter;
 
 @Configuration
-@AllArgsConstructor
 public class SecurityFilterConfig {
 
-  @Autowired
-  private AuthenticationEntryPoint point;
-
-  @Autowired
-  private JwtAuthenticationFilter jwtAuthenticationFilter;
-
+  private final AuthenticationEntryPoint point;
+  private final JwtAuthenticationFilter jwtAuthenticationFilter;
   private String allowedOrigin;
 
-  public SecurityFilterConfig() {}
-
-  public SecurityFilterConfig(
-    @Value("${allowed.origin}") String allowedOrigin
-  ) {
+  @Autowired
+  public SecurityFilterConfig(AuthenticationEntryPoint point,
+                            JwtAuthenticationFilter jwtAuthenticationFilter,
+                            @Value("${allowed.origin}") String allowedOrigin) {
+    this.point = point;
+    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     this.allowedOrigin = allowedOrigin;
   }
 
@@ -56,29 +51,22 @@ public class SecurityFilterConfig {
   }
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity)
-    throws Exception {
+  public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
     httpSecurity
-      .csrf(csrf -> csrf.disable())
-      .cors(cors -> corsConfigurationSource())
-      .headers(header ->
-        header.frameOptions(frameOptions -> frameOptions.disable())
-      )
-      .authorizeHttpRequests(auth ->
-        auth
-          .requestMatchers("/","/home", "/sign-up/", "/authenticate", "/v1/dashboard/**", "/h2-console/**")
-          .permitAll()
-          .anyRequest()
-          .authenticated()
-      )
-      .exceptionHandling(ex -> ex.authenticationEntryPoint(point))
-      .sessionManagement(session ->
-        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-      )
-      .addFilterBefore(
-        jwtAuthenticationFilter,
-        UsernamePasswordAuthenticationFilter.class
-      );
+        .csrf(csrf -> csrf.disable())
+        .cors(cors -> corsConfigurationSource())
+        .headers(header ->header.frameOptions(FrameOptionsConfig::disable))
+        .authorizeHttpRequests(auth ->
+          auth
+            .requestMatchers("/", "/home", "/sign-up/", "/authenticate", "/v1/dashboard/**", "/h2-console/**")
+            .permitAll()
+            .anyRequest()
+            .authenticated())
+        .exceptionHandling(ex -> ex.authenticationEntryPoint(point))
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .addFilterBefore(
+            jwtAuthenticationFilter,
+            UsernamePasswordAuthenticationFilter.class);
     return httpSecurity.build();
   }
 }
