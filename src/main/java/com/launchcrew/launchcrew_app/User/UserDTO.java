@@ -1,11 +1,5 @@
 package com.launchcrew.launchcrew_app.User;
 
-
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
