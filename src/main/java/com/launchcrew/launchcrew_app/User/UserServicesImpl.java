@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -39,7 +40,7 @@ public class UserServicesImpl implements UserServices {
     newUser.setFullName(user.getFullName());
     newUser.setEmail(user.getEmail());
     newUser.setPassword(passwordEncoder.encode(user.getPassword()));
-    newUser.setRole("user");
+    newUser.setRoles(Set.of(User.UserRole.USER)); // Set default role to USER
     userRepository.save(newUser);
     return UserMapper.INSTANCE.toDTO(newUser);
   }

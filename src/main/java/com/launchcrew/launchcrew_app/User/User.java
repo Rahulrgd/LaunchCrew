@@ -59,10 +59,6 @@ public class User implements UserDetails {
   @JsonIgnore
   private String password;
 
-  @Nullable
-  @JsonIgnore
-  private String role;
-
   @ElementCollection(fetch = FetchType.EAGER)
   @Enumerated(EnumType.STRING)
   @Builder.Default
