@@ -28,24 +28,21 @@ public class JwtAuthenticationController {
   public ResponseEntity<JwtResponse> login(@RequestBody @Valid JwtRequest request) {
     this.doAuthenticate(request.getEmail(), request.getPassword());
 
-    UserDetails userDetails = userDetailsService.loadUserByUsername(
-      request.getEmail()
-    );
+    UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
     String token = this.helper.generateToken(userDetails);
 
     JwtResponse response = JwtResponse
-      .builder()
-      .jwtToken(token)
-      .username(userDetails.getUsername())
-      .build();
+        .builder()
+        .jwtToken(token)
+        .username(userDetails.getUsername())
+        .build();
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
   private void doAuthenticate(String email, String password) {
     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-      email,
-      password
-    );
+        email,
+        password);
     try {
       manager.authenticate(authentication);
     } catch (BadCredentialsException e) {

@@ -12,15 +12,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserRestController {
 
+  private final UserServices userServices;
+
   @Autowired
-  private UserServices userServices;
+  public UserRestController(UserServices userServices) {
+    this.userServices = userServices;
+  }
 
   @GetMapping("/all-users")
   public ResponseEntity<?> getAllUsers(@RequestParam int pageNumber) {
     try {
       return ResponseEntity
-        .status(HttpStatus.OK)
-        .body(userServices.getAllUsers(pageNumber));
+          .status(HttpStatus.OK)
+          .body(userServices.getAllUsers(pageNumber));
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
@@ -30,8 +34,8 @@ public class UserRestController {
   public ResponseEntity<?> createUser(@RequestBody User user) {
     try {
       return ResponseEntity
-        .status(HttpStatus.CREATED)
-        .body(userServices.createUser(user));
+          .status(HttpStatus.CREATED)
+          .body(userServices.createUser(user));
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
@@ -41,8 +45,8 @@ public class UserRestController {
   public ResponseEntity<?> getUserDetails() {
     try {
       return ResponseEntity
-        .status(HttpStatus.OK)
-        .body(userServices.getUserDetails());
+          .status(HttpStatus.OK)
+          .body(userServices.getUserDetails());
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
@@ -52,8 +56,8 @@ public class UserRestController {
   public ResponseEntity<?> countTotalUsers() {
     try {
       return ResponseEntity
-        .status(HttpStatus.OK)
-        .body(userServices.countTotalUsers());
+          .status(HttpStatus.OK)
+          .body(userServices.countTotalUsers());
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }

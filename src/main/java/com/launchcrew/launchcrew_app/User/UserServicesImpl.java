@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,19 +16,22 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserServicesImpl implements UserServices{
+public class UserServicesImpl implements UserServices {
+
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
 
   @Autowired
-  private UserRepository userRepository;
-
-  @Autowired
-  private PasswordEncoder passwordEncoder;
+  public UserServicesImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    this.userRepository = userRepository;
+    this.passwordEncoder = passwordEncoder;
+  }
 
   public User getAuthenticatedUser() {
     User user = (User) SecurityContextHolder
-      .getContext()
-      .getAuthentication()
-      .getPrincipal();
+        .getContext()
+        .getAuthentication()
+        .getPrincipal();
     return user;
   }
 
@@ -36,7 +40,7 @@ public class UserServicesImpl implements UserServices{
     newUser.setFullName(user.getFullName());
     newUser.setEmail(user.getEmail());
     newUser.setPassword(passwordEncoder.encode(user.getPassword()));
-    newUser.setRole("user");
+    newUser.setRoles(Set.of(User.UserRole.USER)); // Set default role to USER
     userRepository.save(newUser);
     return UserMapper.INSTANCE.toDTO(newUser);
   }
@@ -45,15 +49,15 @@ public class UserServicesImpl implements UserServices{
     int pageSize = 50;
     Sort sort = Sort.by("fullName").ascending();
     Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-    Page<User> page=  userRepository.findAll(pageable);
-    List<UserDTO> users = page.stream().map(user->UserMapper.INSTANCE.toDTO(user)).collect(Collectors.toList());
-    if(page.hasContent()){
+    Page<User> page = userRepository.findAll(pageable);
+    List<UserDTO> users = page.stream().map(user -> UserMapper.INSTANCE.toDTO(user)).collect(Collectors.toList());
+    if (page.hasContent()) {
       return users;
-    }else{
-      if(page.hasNext()){
+    } else {
+      if (page.hasNext()) {
         pageable = pageable.next();
         page = userRepository.findAll(pageable);
-      }else{
+      } else {
         return new ArrayList<>();
       }
     }
@@ -62,13 +66,9 @@ public class UserServicesImpl implements UserServices{
 
   public UserDTO getUserDetails() {
     Optional<User> optionalUser = userRepository.findById(
-      getAuthenticatedUser().getId()
-    );
-    User user = optionalUser.orElseThrow(() ->
-      new IllegalArgumentException(
-        "User Not Found with ID: " + getAuthenticatedUser().getId()
-      )
-    );
+        getAuthenticatedUser().getId());
+    User user = optionalUser.orElseThrow(() -> new IllegalArgumentException(
+        "User Not Found with ID: " + getAuthenticatedUser().getId()));
     return UserMapper.INSTANCE.toDTO(user);
   }
 
